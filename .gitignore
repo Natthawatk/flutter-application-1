@@ -42,3 +42,22 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Security sensitive files
+*.keystore
+*.jks
+key.properties
+android/local.properties
+.env
+.env.local
+.env.production
+secrets.json
+
+# Personal configuration
+.claude/
+.vscode/settings.json
+
+# Temporary files
+*.tmp
+*.temp
+nul

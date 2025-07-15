@@ -6,7 +6,10 @@
       "Bash(flutter doctor:*)",
       "Bash(flutter build:*)",
       "Bash(flutter create:*)",
-      "Bash(rd:*)"
+      "Bash(rd:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(git add:*)"
     ],
     "deny": []
   }
