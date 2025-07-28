@@ -8,6 +8,9 @@ import 'package:flutter_application_1/model/request/customer_login_post_req.dart
 import 'package:flutter_application_1/model/response/customer_login_post_res.dart';
 import 'package:flutter_application_1/config/api_config.dart';
 import 'package:flutter_application_1/utils/user_session.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
+import 'package:flutter_application_1/widgets/animated_card.dart';
+import 'package:flutter_application_1/widgets/travel_widgets.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({super.key});
@@ -19,97 +22,246 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
   String errorMessage = '';
-  
-  // Pre-defined credentials
-  final String correctPhone = '0812345678';
-  final String correctPassword = '1234';
+  bool isLoading = false;
+  bool _isPasswordVisible = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(),
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(top: 8.0),
-              child: InkWell(
-                child: Image.asset(
-                  'assets/images/travel-logo.jpg',
-                  fit: BoxFit.cover,
-                  height: 200,
-                  width: double.infinity,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: Form(
+              key: _formKey,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('หมายเลขโทรศัพท์'),
-                  TextField(
-                    controller: phoneController,
-                    decoration: const InputDecoration(
-                      hintText: 'ใส่หมายเลขโทรศัพท์',
+                  const SizedBox(height: AppSpacing.xl),
+                  
+                  // Welcome Section
+                  FadeInAnimation(
+                    delay: const Duration(milliseconds: 100),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Welcome Back',
+                          style: AppTheme.headingLarge,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          'Sign in to continue your journey',
+                          style: AppTheme.bodyMedium.copyWith(
+                            color: AppTheme.textSecondary,
+                          ),
+                        ),
+                      ],
                     ),
-                    keyboardType: TextInputType.phone,
                   ),
-                  const SizedBox(height: 16),
-                  const Text('รหัสผ่าน'),
-                  TextField(
-                    controller: passwordController,
-                    decoration: const InputDecoration(
-                      hintText: 'ใส่รหัสผ่าน',
-                    ),
-                    obscureText: true,
-                  ),
-                  const SizedBox(height: 16),
-                  // Error message display
-                  if (errorMessage.isNotEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(12),
+                  
+                  const SizedBox(height: AppSpacing.xxxl),
+                  
+                  // Travel Illustration
+                  SlideInAnimation(
+                    delay: const Duration(milliseconds: 200),
+                    child: Container(
+                      height: 200,
+                      width: double.infinity,
                       decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        border: Border.all(color: Colors.red.shade300),
-                        borderRadius: BorderRadius.circular(8),
+                        borderRadius: AppTheme.radiusXLarge,
+                        gradient: AppTheme.primaryGradient,
                       ),
+                      child: const Icon(
+                        Icons.flight_takeoff,
+                        size: 80,
+                        color: AppTheme.primaryWhite,
+                      ),
+                    ),
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.xl),
+                  
+                  // Phone Number Field
+                  SlideInAnimation(
+                    delay: const Duration(milliseconds: 300),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Phone Number',
+                          style: AppTheme.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextFormField(
+                          controller: phoneController,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your phone number',
+                            prefixIcon: const Icon(
+                              Icons.phone_outlined,
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.trim().isEmpty) {
+                              return 'Please enter your phone number';
+                            }
+                            if (value.length < 10) {
+                              return 'Phone number must be at least 10 digits';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.lg),
+                  
+                  // Password Field
+                  SlideInAnimation(
+                    delay: const Duration(milliseconds: 400),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Password',
+                          style: AppTheme.bodyMedium.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        TextFormField(
+                          controller: passwordController,
+                          obscureText: !_isPasswordVisible,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your password',
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: AppTheme.textSecondary,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _isPasswordVisible
+                                    ? Icons.visibility_off_outlined
+                                    : Icons.visibility_outlined,
+                                color: AppTheme.textSecondary,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _isPasswordVisible = !_isPasswordVisible;
+                                });
+                              },
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter your password';
+                            }
+                            return null;
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.sm),
+                  
+                  // Error Message
+                  if (errorMessage.isNotEmpty)
+                    SlideInAnimation(
+                      child: Container(
+                        margin: const EdgeInsets.only(top: AppSpacing.md),
+                        padding: const EdgeInsets.all(AppSpacing.md),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: AppTheme.radiusMedium,
+                          border: Border.all(color: Colors.red.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error_outline,
+                              color: Colors.red.shade600,
+                              size: 20,
+                            ),
+                            const SizedBox(width: AppSpacing.sm),
+                            Expanded(
+                              child: Text(
+                                errorMessage,
+                                style: TextStyle(
+                                  color: Colors.red.shade600,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  
+                  const SizedBox(height: AppSpacing.xl),
+                  
+                  // Login Button
+                  SlideInAnimation(
+                    delay: const Duration(milliseconds: 500),
+                    child: PrimaryButton(
+                      text: 'Sign In',
+                      isLoading: isLoading,
+                      icon: Icons.login,
+                      onPressed: _handleLogin,
+                    ),
+                  ),
+                  
+                  const SizedBox(height: AppSpacing.lg),
+                  
+                  // Register Link
+                  SlideInAnimation(
+                    delay: const Duration(milliseconds: 600),
+                    child: Center(
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline, color: Colors.red.shade600, size: 20),
-                          const SizedBox(width: 8),
-                          Expanded(
+                          Text(
+                            "Don't have an account? ",
+                            style: AppTheme.bodyMedium.copyWith(
+                              color: AppTheme.textSecondary,
+                            ),
+                          ),
+                          GestureDetector(
+                            onTap: register,
                             child: Text(
-                              errorMessage,
-                              style: TextStyle(color: Colors.red.shade600, fontSize: 14),
+                              'Sign Up',
+                              style: AppTheme.bodyMedium.copyWith(
+                                color: AppTheme.primaryBlack,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      TextButton(
-                        onPressed: register,
-                        child: const Text('ลงทะเบียนใหม่'),
-                      ),
-                      FilledButton(
-                        onPressed: () => login(phoneController.text, passwordController.text),
-                        child: const Text('เข้าสู่ระบบ'),
-                      ),
-                    ],
                   ),
+                  
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
+  }
+
+  void _handleLogin() {
+    if (_formKey.currentState!.validate()) {
+      login(phoneController.text, passwordController.text);
+    }
   }
 
 // Process
@@ -121,15 +273,8 @@ class _LoginPageState extends State<LoginPage> {
   void login(String phone, String password) async {
     setState(() {
       errorMessage = '';
+      isLoading = true;
     });
-
-    // Validate fields are not empty
-    if (phone.trim().isEmpty || password.trim().isEmpty) {
-      setState(() {
-        errorMessage = 'กรุณากรอกหมายเลขโทรศัพท์และรหัสผ่าน';
-      });
-      return;
-    }
 
     try {
       // Create request object
@@ -166,25 +311,29 @@ class _LoginPageState extends State<LoginPage> {
         // Navigate to ShowTripPage on successful login
         Navigator.pushReplacement(
           context, 
-          MaterialPageRoute(builder: (context) => ShowTripPage())
+          MaterialPageRoute(builder: (context) => const ShowTripPage())
         );
       } else if (response.statusCode == 401) {
         setState(() {
-          errorMessage = 'หมายเลขโทรศัพท์หรือรหัสผ่านไม่ถูกต้อง';
+          errorMessage = 'Invalid phone number or password';
         });
       } else if (response.statusCode == 404) {
         setState(() {
-          errorMessage = 'ไม่พบผู้ใช้งานในระบบ';
+          errorMessage = 'User not found in system';
         });
       } else {
         setState(() {
-          errorMessage = 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ';
+          errorMessage = 'Login failed. Please try again.';
         });
       }
     } catch (error) {
       log('Login error: $error');
       setState(() {
-        errorMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+        errorMessage = 'Connection error. Please check your internet.';
+      });
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }

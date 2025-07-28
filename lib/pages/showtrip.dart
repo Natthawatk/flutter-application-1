@@ -8,6 +8,9 @@ import 'package:flutter_application_1/pages/trip.dart';
 import 'package:flutter_application_1/pages/profile.dart';
 import 'package:flutter_application_1/pages/login.dart';
 import 'package:flutter_application_1/utils/user_session.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
+import 'package:flutter_application_1/widgets/animated_card.dart';
+import 'package:flutter_application_1/widgets/travel_widgets.dart';
 
 class ShowTripPage extends StatefulWidget {
   const ShowTripPage({super.key});
@@ -19,15 +22,16 @@ class ShowTripPage extends StatefulWidget {
 class _ShowTripPageState extends State<ShowTripPage> {
   // รายการหมวดหมู่ปลายทาง
   final List<String> destinations = [
-    "ทั้งหมด",
-    "เอเชีย",
-    "ยุโรป",
-    "อาเซียน",
-    "อเมริกา",
-    "แอฟริกา"
+    "All",
+    "Asia",
+    "Europe",
+    "ASEAN",
+    "America",
+    "Africa"
   ];
+  
   // หมวดหมู่ที่ถูกเลือกปัจจุบัน
-  String selectedDestination = "ทั้งหมด";
+  String selectedDestination = "All";
   
   // ข้อมูลทริปจาก database
   List<Trip> trips = [];
@@ -64,13 +68,13 @@ class _ShowTripPageState extends State<ShowTripPage> {
         log('✅ Loaded ${trips.length} trips successfully');
       } else {
         setState(() {
-          errorMessage = 'ไม่สามารถโหลดข้อมูลทริปได้: ${response.statusCode}';
+          errorMessage = 'Failed to load trips: ${response.statusCode}';
         });
       }
     } catch (error) {
       log('❌ Error loading trips: $error');
       setState(() {
-        errorMessage = 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์';
+        errorMessage = 'Connection error. Please check your internet.';
       });
     } finally {
       setState(() {
@@ -81,297 +85,281 @@ class _ShowTripPageState extends State<ShowTripPage> {
 
   // ฟังก์ชันกรองทริปตามปลายทาง
   void _filterTrips() {
-    if (selectedDestination == "ทั้งหมด") {
-      filteredTrips = trips;
-    } else {
-      filteredTrips = trips.where((trip) => 
-        trip.destinationZone.toLowerCase() == selectedDestination.toLowerCase()
-      ).toList();
-    }
+    setState(() {
+      if (selectedDestination == "All") {
+        filteredTrips = trips;
+      } else {
+        // แปลงชื่อหมวดหมู่เป็นภาษาไทยสำหรับการเปรียบเทียบ
+        String destinationInThai = _getDestinationInThai(selectedDestination);
+        filteredTrips = trips.where((trip) {
+          return trip.destinationZone.toLowerCase().contains(destinationInThai.toLowerCase()) ||
+                 trip.destinationZone.toLowerCase().contains(selectedDestination.toLowerCase());
+        }).toList();
+      }
+    });
     log('🔍 Filtered trips: ${filteredTrips.length} trips for $selectedDestination');
+  }
+
+  // ฟังก์ชันแปลงชื่อหมวดหมู่เป็นภาษาไทย
+  String _getDestinationInThai(String englishDestination) {
+    switch (englishDestination.toLowerCase()) {
+      case 'asia':
+        return 'เอเชีย';
+      case 'europe':
+        return 'ยุโรป';
+      case 'asean':
+        return 'อาเซียน';
+      case 'america':
+        return 'อเมริกา';
+      case 'africa':
+        return 'แอฟริกา';
+      default:
+        return englishDestination;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // สีหลักที่ใช้ในดีไซน์
-    const primaryColor = Color(0xFF8A5DB3);
-    const cardBackgroundColor = Color(0xFFF8F5FA);
-    const screenBackgroundColor = Color(0xFFFFFFFF);
-
     return Scaffold(
-      backgroundColor: screenBackgroundColor,
-      appBar: AppBar(
-        title: const Text('รายการทริป'),
-        automaticallyImplyLeading: false,
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              log(value);
-              if (value == 'profile') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const ProfilePage(),
-                  ),
-                );
-              } else if (value == 'logout') {
-                _showLogoutConfirmation();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(
-                value: 'profile',
-                child: Text('ข้อมูลส่วนตัว'),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: _loadTrips,
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              // Header
+              SliverToBoxAdapter(
+                child: TravelHeader(
+                  greeting: 'Hello, ${UserSession.currentUserName ?? 'Traveler'}',
+                  subtitle: 'Discover amazing destinations',
+                  avatarUrl: UserSession.currentUserImage,
+                  onMenuTap: _showMenuOptions,
+                  onAvatarTap: () => _navigateToProfile(),
+                ),
               ),
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Text('ออกจากระบบ'),
+              
+              // Search Bar
+              const SliverToBoxAdapter(
+                child: TravelSearchBar(
+                  hintText: 'Search destinations...',
+                ),
               ),
-            ],
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadTrips,
-        child: SingleChildScrollView(
-          // ทำให้ทั้งหน้าจอสามารถเลื่อนได้ในแนวตั้ง
-          physics: const AlwaysScrollableScrollPhysics(),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-              // ส่วนหัวข้อ "ปลายทาง" และปุ่ม Filter
-              _buildDestinationFilter(primaryColor),
-
-              const SizedBox(height: 16),
-
-              // แสดงสถานะการโหลดหรือข้อผิดพลาด
+              
+              // Category Tabs
+              SliverToBoxAdapter(
+                child: CategoryTabs(
+                  categories: destinations,
+                  selectedCategory: selectedDestination,
+                  onCategorySelected: (category) {
+                    setState(() {
+                      selectedDestination = category;
+                      _filterTrips();
+                    });
+                  },
+                ),
+              ),
+              
+              // Content
               if (isLoading)
-                const Center(
-                  child: Padding(
-                    padding: EdgeInsets.all(32.0),
-                    child: CircularProgressIndicator(),
+                const SliverFillRemaining(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: AppTheme.primaryBlack,
+                    ),
                   ),
                 )
               else if (errorMessage.isNotEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      children: [
-                        Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-                        const SizedBox(height: 16),
-                        Text(
-                          errorMessage,
-                          style: TextStyle(color: Colors.red.shade600),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 16),
-                        ElevatedButton(
-                          onPressed: _loadTrips,
-                          child: const Text('ลองใหม่'),
-                        ),
-                      ],
-                    ),
-                  ),
+                SliverFillRemaining(
+                  child: _buildErrorState(),
                 )
               else if (filteredTrips.isEmpty)
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(32.0),
-                    child: Column(
-                      children: [
-                        Icon(Icons.travel_explore, size: 64, color: Colors.grey.shade400),
-                        const SizedBox(height: 16),
-                        Text(
-                          'ไม่พบทริปในหมวดหมู่ "$selectedDestination"',
-                          style: TextStyle(color: Colors.grey.shade600),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
-                    ),
-                  ),
+                SliverFillRemaining(
+                  child: _buildEmptyState(),
                 )
               else
-                // รายการการ์ดทริปจาก database
-                ...filteredTrips.map((trip) => _buildTripCard(
-                  trip: trip,
-                  primaryColor: primaryColor,
-                  cardBackgroundColor: cardBackgroundColor,
-                )),
-                ],
+                SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final trip = filteredTrips[index];
+                      return SlideInAnimation(
+                        delay: Duration(milliseconds: 100 * index),
+                        child: DestinationCard(
+                          title: trip.name,
+                          location: trip.country,
+                          imageUrl: trip.coverimage,
+                          rating: 4.5, // Default rating since not in model
+                          reviewCount: 128, // Default review count
+                          onTap: () => _navigateToTripDetail(trip.idx),
+                          onFavorite: () => _toggleFavorite(trip.idx),
+                        ),
+                      );
+                    },
+                    childCount: filteredTrips.length,
+                  ),
+                ),
+              
+              // Bottom spacing
+              const SliverToBoxAdapter(
+                child: SizedBox(height: AppSpacing.xl),
               ),
-            ),
+            ],
           ),
         ),
-    );
-  }
-
-  /// Widget สำหรับสร้างส่วน Filter ปลายทาง
-  Widget _buildDestinationFilter(Color primaryColor) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16.0, top: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'ปลายทาง',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          // Widget ที่ทำให้ List สามารถเลื่อนแนวนอนได้
-          SizedBox(
-            height: 40,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: destinations.length,
-              itemBuilder: (context, index) {
-                final destination = destinations[index];
-                final isSelected = destination == selectedDestination;
-                return Padding(
-                  padding:
-                      EdgeInsets.only(right: 8.0, left: index == 0 ? 0 : 0),
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        selectedDestination = destination;
-                        _filterTrips();
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          isSelected ? primaryColor : const Color(0xFFEAEAEA),
-                      foregroundColor: isSelected ? Colors.white : Colors.black,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: Text(destination),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  /// Widget สำหรับสร้างการ์ดทริปแต่ละใบ
-  Widget _buildTripCard({
-    required Trip trip,
-    required Color primaryColor,
-    required Color cardBackgroundColor,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            trip.name,
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Card(
-            color: cardBackgroundColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            elevation: 2,
-            clipBehavior: Clip.antiAlias,
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // รูปภาพ
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(8.0),
-                    child: Image.network(
-                      trip.coverimage,
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return Container(
-                          width: 120,
-                          height: 120,
-                          color: Colors.grey[300],
-                          child:
-                              const Center(child: CircularProgressIndicator()),
-                        );
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: 120,
-                          height: 120,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.broken_image,
-                              color: Colors.grey),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  // รายละเอียดทริป
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          trip.country,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text('ระยะเวลา ${trip.duration} วัน',
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.grey)),
-                        const SizedBox(height: 4),
-                        Text('ราคา ${trip.price.toStringAsFixed(0)} บาท',
-                            style: const TextStyle(
-                                fontSize: 14, color: Colors.grey)),
-
-                        // เว้นระยะห่างก่อนถึงปุ่ม
-                        const SizedBox(height: 8),
-
-                        Align(
-                          alignment: Alignment.bottomRight,
-                          child: ElevatedButton(
-                            onPressed: () {
-                            // Navigate ไปหน้ารายละเอียดทริป
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => TripPage(idx: trip.idx),
-                              ),
-                            );
-                          },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: primaryColor,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            child: const Text('รายละเอียดเพิ่มเติม'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.lightGray,
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                size: 60,
+                color: AppTheme.textSecondary,
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Oops! Something went wrong',
+              style: AppTheme.headingSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              errorMessage,
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              text: 'Try Again',
+              onPressed: _loadTrips,
+              icon: Icons.refresh,
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.lightGray,
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: const Icon(
+                Icons.travel_explore,
+                size: 60,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'No trips found',
+              style: AppTheme.headingSmall,
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              'No trips available in "$selectedDestination" category',
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showMenuOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppTheme.primaryWhite,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.textMuted,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                _navigateToProfile();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.red),
+              title: const Text('Logout', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _showLogoutConfirmation();
+              },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _navigateToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ProfilePage()),
+    );
+  }
+
+  void _navigateToTripDetail(int tripId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => TripPage(idx: tripId)),
+    );
+  }
+
+  void _toggleFavorite(int tripId) {
+    // TODO: Implement favorite functionality
+    log('Toggle favorite for trip: $tripId');
   }
 
   // ฟังก์ชันแสดงการยืนยัน logout
@@ -380,28 +368,36 @@ class _ShowTripPageState extends State<ShowTripPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.radiusLarge,
+          ),
           title: const Row(
             children: [
               Icon(Icons.logout, color: Colors.orange),
               SizedBox(width: 8),
-              Text('ออกจากระบบ'),
+              Text('Logout'),
             ],
           ),
-          content: const Text('คุณต้องการออกจากระบบหรือไม่?'),
+          content: const Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ยกเลิก'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text('Cancel'),
             ),
-            FilledButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _performLogout();
               },
-              style: FilledButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child: const Text('ออกจากระบบ'),
+              child: const Text('Logout'),
             ),
           ],
         );
@@ -419,7 +415,7 @@ class _ShowTripPageState extends State<ShowTripPage> {
     // แสดงข้อความ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('ออกจากระบบสำเร็จ'),
+        content: Text('Logged out successfully'),
         backgroundColor: Colors.orange,
       ),
     );

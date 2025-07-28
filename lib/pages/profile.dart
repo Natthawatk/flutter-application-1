@@ -5,6 +5,9 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_application_1/config/api_config.dart';
 import 'package:flutter_application_1/pages/login.dart';
 import 'package:flutter_application_1/utils/user_session.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
+import 'package:flutter_application_1/widgets/animated_card.dart';
+import 'package:flutter_application_1/widgets/travel_widgets.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -149,49 +152,17 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('ข้อมูลส่วนตัว'),
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              log(value);
-              if (value == 'logout') {
-                _showLogoutConfirmation();
-              } else if (value == 'delete') {
-                _showDeleteAccountConfirmation();
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem<String>(
-                value: 'logout',
-                child: Row(
-                  children: [
-                    Icon(Icons.logout, color: Colors.orange),
-                    SizedBox(width: 8),
-                    Text('ออกจากระบบ'),
-                  ],
+      body: SafeArea(
+        child: isLoading
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: AppTheme.primaryBlack,
                 ),
-              ),
-              const PopupMenuItem<String>(
-                value: 'delete',
-                child: Row(
-                  children: [
-                    Icon(Icons.delete_forever, color: Colors.red),
-                    SizedBox(width: 8),
-                    Text('ยกเลิกสมาชิก', style: TextStyle(color: Colors.red)),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+              )
+            : errorMessage.isNotEmpty
+                ? _buildErrorWidget()
+                : _buildProfileContent(),
       ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : errorMessage.isNotEmpty
-              ? _buildErrorWidget()
-              : _buildProfileForm(),
     );
   }
 
@@ -199,21 +170,143 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget _buildErrorWidget() {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(32.0),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.red.shade300),
-            const SizedBox(height: 16),
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.lightGray,
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: const Icon(
+                Icons.error_outline,
+                size: 60,
+                color: AppTheme.textSecondary,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
             Text(
-              errorMessage,
-              style: TextStyle(color: Colors.red.shade600),
+              'Oops! Something went wrong',
+              style: AppTheme.headingSmall,
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              errorMessage,
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            PrimaryButton(
+              text: 'Try Again',
               onPressed: _loadUserProfile,
-              child: const Text('ลองใหม่'),
+              icon: Icons.refresh,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget เนื้อหาโปรไฟล์
+  Widget _buildProfileContent() {
+    return CustomScrollView(
+      slivers: [
+        // Header with menu
+        SliverToBoxAdapter(
+          child: _buildProfileHeader(),
+        ),
+        
+        // Profile Image and Info
+        SliverToBoxAdapter(
+          child: _buildProfileImageSection(),
+        ),
+        
+        // Form Fields
+        SliverToBoxAdapter(
+          child: _buildProfileForm(),
+        ),
+        
+        // Save Button
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.lg),
+            child: _buildSaveButton(),
+          ),
+        ),
+        
+        // Bottom spacing
+        const SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.xl),
+        ),
+      ],
+    );
+  }
+
+  // Widget header โปรไฟล์
+  Widget _buildProfileHeader() {
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.arrow_back),
+          ),
+          Expanded(
+            child: Text(
+              'Profile',
+              style: AppTheme.headingMedium,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          // Menu button
+          GestureDetector(
+            onTap: _showMenuOptions,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                color: AppTheme.primaryBlack,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.more_vert,
+                color: AppTheme.primaryWhite,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Widget ส่วนรูปโปรไฟล์
+  Widget _buildProfileImageSection() {
+    return FadeInAnimation(
+      delay: const Duration(milliseconds: 200),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        child: Column(
+          children: [
+            _buildProfileImage(),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              UserSession.currentUserName ?? 'User',
+              style: AppTheme.headingSmall,
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              UserSession.currentUserEmail ?? 'user@example.com',
+              style: AppTheme.bodyMedium.copyWith(
+                color: AppTheme.textSecondary,
+              ),
             ),
           ],
         ),
@@ -223,25 +316,26 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Widget ฟอร์มแก้ไขข้อมูล
   Widget _buildProfileForm() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            // รูปโปรไฟล์
-            _buildProfileImage(),
-            const SizedBox(height: 24),
-            
-            // ฟอร์มข้อมูล
-            _buildFormFields(),
-            
-            const SizedBox(height: 32),
-            
-            // ปุ่มบันทึก
-            _buildSaveButton(),
-          ],
+    return SlideInAnimation(
+      delay: const Duration(milliseconds: 400),
+      child: Container(
+        margin: const EdgeInsets.all(AppSpacing.md),
+        child: AnimatedCard(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Personal Information',
+                  style: AppTheme.headingSmall,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                _buildFormFields(),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -249,47 +343,75 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Widget รูปโปรไฟล์
   Widget _buildProfileImage() {
-    return Column(
+    return Stack(
       children: [
         Container(
           width: 120,
           height: 120,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.grey.shade300, width: 2),
+            gradient: AppTheme.primaryGradient,
+            boxShadow: const [AppTheme.cardShadow],
           ),
-          child: ClipOval(
-            child: _imageController.text.isNotEmpty
-                ? Image.network(
-                    _imageController.text,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        color: Colors.grey[300],
-                        child: const Center(child: CircularProgressIndicator()),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: Colors.grey[300],
-                        child: const Icon(Icons.person, size: 60, color: Colors.grey),
-                      );
-                    },
-                  )
-                : Container(
-                    color: Colors.grey[300],
-                    child: const Icon(Icons.person, size: 60, color: Colors.grey),
-                  ),
+          child: Container(
+            margin: const EdgeInsets.all(4),
+            decoration: const BoxDecoration(
+              shape: BoxShape.circle,
+              color: AppTheme.primaryWhite,
+            ),
+            child: ClipOval(
+              child: _imageController.text.isNotEmpty
+                  ? Image.network(
+                      _imageController.text,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Container(
+                          color: AppTheme.lightGray,
+                          child: const Center(
+                            child: CircularProgressIndicator(
+                              color: AppTheme.primaryBlack,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppTheme.lightGray,
+                          child: const Icon(
+                            Icons.person,
+                            size: 60,
+                            color: AppTheme.textSecondary,
+                          ),
+                        );
+                      },
+                    )
+                  : Container(
+                      color: AppTheme.lightGray,
+                      child: const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: AppTheme.textSecondary,
+                      ),
+                    ),
+            ),
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'รูปโปรไฟล์',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
-            color: Colors.grey.shade700,
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: Container(
+            width: 36,
+            height: 36,
+            decoration: const BoxDecoration(
+              color: AppTheme.primaryBlack,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(
+              Icons.camera_alt,
+              color: AppTheme.primaryWhite,
+              size: 18,
+            ),
           ),
         ),
       ],
@@ -302,91 +424,107 @@ class _ProfilePageState extends State<ProfilePage> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ชื่อ-นามสกุล
-        const Text(
-          'ชื่อ-นามสกุล',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        Text(
+          'Full Name',
+          style: AppTheme.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _fullNameController,
           decoration: const InputDecoration(
-            hintText: 'กรอกชื่อ-นามสกุล',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.person),
+            hintText: 'Enter your full name',
+            prefixIcon: Icon(
+              Icons.person_outline,
+              color: AppTheme.textSecondary,
+            ),
           ),
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'กรุณากรอกชื่อ-นามสกุล';
+              return 'Please enter your full name';
             }
             return null;
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // หมายเลขโทรศัพท์
-        const Text(
-          'หมายเลขโทรศัพท์',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        Text(
+          'Phone Number',
+          style: AppTheme.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _phoneController,
           decoration: const InputDecoration(
-            hintText: 'กรอกหมายเลขโทรศัพท์',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.phone),
+            hintText: 'Enter your phone number',
+            prefixIcon: Icon(
+              Icons.phone_outlined,
+              color: AppTheme.textSecondary,
+            ),
           ),
           keyboardType: TextInputType.phone,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'กรุณากรอกหมายเลขโทรศัพท์';
+              return 'Please enter your phone number';
             }
             if (value.length < 10) {
-              return 'หมายเลขโทรศัพท์ต้องมีอย่างน้อย 10 หลัก';
+              return 'Phone number must be at least 10 digits';
             }
             return null;
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // อีเมล์
-        const Text(
-          'อีเมล์',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        Text(
+          'Email',
+          style: AppTheme.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _emailController,
           decoration: const InputDecoration(
-            hintText: 'กรอกที่อยู่อีเมล์',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.email),
+            hintText: 'Enter your email',
+            prefixIcon: Icon(
+              Icons.email_outlined,
+              color: AppTheme.textSecondary,
+            ),
           ),
           keyboardType: TextInputType.emailAddress,
           validator: (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'กรุณากรอกอีเมล์';
+              return 'Please enter your email';
             }
             if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-              return 'รูปแบบอีเมล์ไม่ถูกต้อง';
+              return 'Please enter a valid email';
             }
             return null;
           },
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // URL รูปภาพ
-        const Text(
-          'URL รูปภาพ',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        Text(
+          'Profile Image URL',
+          style: AppTheme.bodyMedium.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         TextFormField(
           controller: _imageController,
           decoration: const InputDecoration(
-            hintText: 'กรอก URL รูปภาพ (ไม่บังคับ)',
-            border: OutlineInputBorder(),
-            prefixIcon: Icon(Icons.image),
+            hintText: 'Enter image URL (optional)',
+            prefixIcon: Icon(
+              Icons.image_outlined,
+              color: AppTheme.textSecondary,
+            ),
           ),
           keyboardType: TextInputType.url,
           onChanged: (value) {
@@ -397,7 +535,7 @@ class _ProfilePageState extends State<ProfilePage> {
             if (value != null && value.trim().isNotEmpty) {
               final uri = Uri.tryParse(value);
               if (uri == null || !uri.hasAbsolutePath) {
-                return 'รูปแบบ URL ไม่ถูกต้อง';
+                return 'Please enter a valid URL';
               }
             }
             return null;
@@ -409,38 +547,68 @@ class _ProfilePageState extends State<ProfilePage> {
 
   // Widget ปุ่มบันทึก
   Widget _buildSaveButton() {
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: isSaving ? null : _saveUserProfile,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF8A5DB3),
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
+    return PrimaryButton(
+      text: 'Save Changes',
+      isLoading: isSaving,
+      icon: Icons.save,
+      onPressed: _saveUserProfile,
+    );
+  }
+
+  // แสดงเมนูตัวเลือก
+  void _showMenuOptions() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: AppTheme.primaryWhite,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
         ),
-        child: isSaving
-            ? const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  ),
-                  SizedBox(width: 12),
-                  Text('กำลังบันทึก...'),
-                ],
-              )
-            : const Text(
-                'บันทึกข้อมูล',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 12),
+              decoration: BoxDecoration(
+                color: AppTheme.textMuted,
+                borderRadius: BorderRadius.circular(2),
               ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: const Text('Edit Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                // Focus on first field for editing
+                FocusScope.of(context).requestFocus(FocusNode());
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.logout, color: Colors.orange),
+              title: const Text('Logout', style: TextStyle(color: Colors.orange)),
+              onTap: () {
+                Navigator.pop(context);
+                _showLogoutConfirmation();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_forever, color: Colors.red),
+              title: const Text('Delete Account', style: TextStyle(color: Colors.red)),
+              onTap: () {
+                Navigator.pop(context);
+                _showDeleteAccountConfirmation();
+              },
+            ),
+            const SizedBox(height: AppSpacing.lg),
+          ],
+        ),
       ),
     );
   }
@@ -451,28 +619,36 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.radiusLarge,
+          ),
           title: const Row(
             children: [
               Icon(Icons.logout, color: Colors.orange),
               SizedBox(width: 8),
-              Text('ออกจากระบบ'),
+              Text('Logout'),
             ],
           ),
-          content: const Text('คุณต้องการออกจากระบบหรือไม่?'),
+          content: const Text('Are you sure you want to logout?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ยกเลิก'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text('Cancel'),
             ),
-            FilledButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _performLogout();
               },
-              style: FilledButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.orange,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child: const Text('ออกจากระบบ'),
+              child: const Text('Logout'),
             ),
           ],
         );
@@ -486,38 +662,46 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: AppTheme.radiusLarge,
+          ),
           title: const Row(
             children: [
               Icon(Icons.warning, color: Colors.red),
               SizedBox(width: 8),
-              Text('ยกเลิกสมาชิก'),
+              Text('Delete Account'),
             ],
           ),
           content: const Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('⚠️ การดำเนินการนี้ไม่สามารถย้อนกลับได้'),
+              Text('⚠️ This action cannot be undone'),
               SizedBox(height: 8),
-              Text('ข้อมูลทั้งหมดของคุณจะถูกลบออกจากระบบ'),
+              Text('All your data will be permanently deleted'),
               SizedBox(height: 8),
-              Text('คุณแน่ใจหรือไม่ที่ต้องการยกเลิกสมาชิก?'),
+              Text('Are you sure you want to delete your account?'),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ยกเลิก'),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: const Text('Cancel'),
             ),
-            FilledButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
                 _performDeleteAccount();
               },
-              style: FilledButton.styleFrom(
+              style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
-              child: const Text('ยืนยันการลบ'),
+              child: const Text('Delete'),
             ),
           ],
         );
@@ -535,7 +719,7 @@ class _ProfilePageState extends State<ProfilePage> {
     // แสดงข้อความ
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('ออกจากระบบสำเร็จ'),
+        content: Text('Logged out successfully'),
         backgroundColor: Colors.orange,
       ),
     );
@@ -569,7 +753,7 @@ class _ProfilePageState extends State<ProfilePage> {
         // แสดงข้อความสำเร็จ
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('ยกเลิกสมาชิกสำเร็จ'),
+            content: Text('Account deleted successfully'),
             backgroundColor: Colors.green,
           ),
         );

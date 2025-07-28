@@ -1,23 +1,33 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_application_1/pages/login.dart';
+import 'package:flutter_application_1/theme/app_theme.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Set system UI overlay style
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+      systemNavigationBarColor: Colors.white,
+      systemNavigationBarIconBrightness: Brightness.dark,
+    ),
+  );
+  
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      // theme: ThemeData(
-      //   useMaterial3: true,
-      //   colorScheme: ColorScheme.fromSeed(
-      //       seedColor: const Color.fromARGB(255, 33, 198, 243)),
-      // ),
-      // title: 'Flutter Demo',
+      title: 'TripGuide Travel App',
+      theme: AppTheme.lightTheme,
+      debugShowCheckedModeBanner: false,
       home: LoginPage(),
     );
   }

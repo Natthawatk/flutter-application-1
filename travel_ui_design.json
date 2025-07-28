@@ -1,0 +1,446 @@
+{
+  "designSystem": {
+    "name": "TripGuide Travel App",
+    "version": "1.0.0",
+    "description": "Modern travel app UI design system with stunning visuals and smooth interactions"
+  },
+  "colorPalette": {
+    "primary": {
+      "main": "#000000",
+      "light": "#333333",
+      "dark": "#000000"
+    },
+    "secondary": {
+      "main": "#FFFFFF",
+      "light": "#F8F9FA",
+      "gray": "#6C757D"
+    },
+    "accent": {
+      "teal": "#20B2AA",
+      "orange": "#FF6B35",
+      "blue": "#4A90E2"
+    },
+    "background": {
+      "primary": "#FFFFFF",
+      "secondary": "#F8F9FA",
+      "overlay": "rgba(0, 0, 0, 0.3)",
+      "gradient": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)"
+    },
+    "text": {
+      "primary": "#1A1A1A",
+      "secondary": "#6C757D",
+      "inverse": "#FFFFFF",
+      "muted": "#999999"
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "primary": "SF Pro Display, -apple-system, BlinkMacSystemFont, sans-serif",
+      "secondary": "SF Pro Text, -apple-system, BlinkMacSystemFont, sans-serif"
+    },
+    "fontSize": {
+      "xs": "12px",
+      "sm": "14px",
+      "base": "16px",
+      "lg": "18px",
+      "xl": "20px",
+      "2xl": "24px",
+      "3xl": "30px",
+      "4xl": "36px"
+    },
+    "fontWeight": {
+      "light": 300,
+      "regular": 400,
+      "medium": 500,
+      "semibold": 600,
+      "bold": 700,
+      "extrabold": 800
+    },
+    "lineHeight": {
+      "tight": 1.2,
+      "normal": 1.5,
+      "relaxed": 1.6
+    }
+  },
+  "spacing": {
+    "xs": "4px",
+    "sm": "8px",
+    "md": "16px",
+    "lg": "24px",
+    "xl": "32px",
+    "2xl": "48px",
+    "3xl": "64px"
+  },
+  "borderRadius": {
+    "none": "0px",
+    "sm": "8px",
+    "md": "12px",
+    "lg": "16px",
+    "xl": "20px",
+    "2xl": "24px",
+    "full": "999px"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(0, 0, 0, 0.1)",
+    "md": "0 4px 12px rgba(0, 0, 0, 0.1)",
+    "lg": "0 8px 25px rgba(0, 0, 0, 0.15)",
+    "xl": "0 20px 40px rgba(0, 0, 0, 0.1)"
+  },
+  "components": {
+    "header": {
+      "height": "60px",
+      "backgroundColor": "#FFFFFF",
+      "padding": "16px",
+      "borderRadius": "0px",
+      "shadow": "none",
+      "elements": {
+        "greeting": {
+          "fontSize": "24px",
+          "fontWeight": 700,
+          "color": "#1A1A1A",
+          "text": "Hello, Vanessa"
+        },
+        "subtitle": {
+          "fontSize": "14px",
+          "fontWeight": 400,
+          "color": "#6C757D",
+          "text": "Welcome to TripGuide"
+        },
+        "avatar": {
+          "size": "40px",
+          "borderRadius": "50%",
+          "border": "none"
+        },
+        "menuButton": {
+          "size": "40px",
+          "backgroundColor": "#1A1A1A",
+          "borderRadius": "50%",
+          "iconColor": "#FFFFFF"
+        }
+      }
+    },
+    "searchBar": {
+      "height": "48px",
+      "backgroundColor": "#F8F9FA",
+      "borderRadius": "12px",
+      "padding": "12px 16px",
+      "margin": "16px 0px",
+      "placeholder": {
+        "text": "Search",
+        "color": "#6C757D",
+        "fontSize": "16px"
+      },
+      "icon": {
+        "color": "#6C757D",
+        "size": "20px"
+      }
+    },
+    "categoryTabs": {
+      "container": {
+        "display": "flex",
+        "gap": "12px",
+        "margin": "16px 0px"
+      },
+      "tab": {
+        "height": "40px",
+        "padding": "8px 20px",
+        "borderRadius": "20px",
+        "fontSize": "14px",
+        "fontWeight": 500
+      },
+      "activeTab": {
+        "backgroundColor": "#1A1A1A",
+        "color": "#FFFFFF"
+      },
+      "inactiveTab": {
+        "backgroundColor": "#F8F9FA",
+        "color": "#6C757D"
+      }
+    },
+    "destinationCard": {
+      "large": {
+        "width": "100%",
+        "height": "320px",
+        "borderRadius": "20px",
+        "overflow": "hidden",
+        "position": "relative",
+        "shadow": "0 8px 25px rgba(0, 0, 0, 0.15)",
+        "overlay": {
+          "background": "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.2) 50%, transparent 100%)"
+        },
+        "content": {
+          "position": "absolute",
+          "bottom": "20px",
+          "left": "20px",
+          "right": "20px"
+        },
+        "title": {
+          "fontSize": "28px",
+          "fontWeight": 700,
+          "color": "#FFFFFF",
+          "marginBottom": "8px"
+        },
+        "location": {
+          "fontSize": "16px",
+          "fontWeight": 400,
+          "color": "#FFFFFF",
+          "opacity": 0.9
+        },
+        "rating": {
+          "display": "flex",
+          "alignItems": "center",
+          "gap": "8px",
+          "marginTop": "12px",
+          "backgroundColor": "rgba(255, 255, 255, 0.2)",
+          "padding": "6px 12px",
+          "borderRadius": "20px",
+          "backdropFilter": "blur(10px)"
+        },
+        "heartButton": {
+          "position": "absolute",
+          "top": "16px",
+          "right": "16px",
+          "size": "40px",
+          "backgroundColor": "rgba(255, 255, 255, 0.2)",
+          "borderRadius": "50%",
+          "backdropFilter": "blur(10px)"
+        }
+      }
+    },
+    "tourCard": {
+      "width": "240px",
+      "borderRadius": "16px",
+      "overflow": "hidden",
+      "backgroundColor": "#FFFFFF",
+      "shadow": "0 4px 12px rgba(0, 0, 0, 0.1)",
+      "image": {
+        "height": "160px",
+        "width": "100%",
+        "objectFit": "cover"
+      },
+      "content": {
+        "padding": "16px"
+      },
+      "title": {
+        "fontSize": "18px",
+        "fontWeight": 600,
+        "color": "#1A1A1A",
+        "marginBottom": "8px"
+      },
+      "details": {
+        "fontSize": "14px",
+        "color": "#6C757D",
+        "marginBottom": "12px"
+      },
+      "rating": {
+        "display": "flex",
+        "alignItems": "center",
+        "gap": "4px",
+        "fontSize": "14px",
+        "color": "#1A1A1A"
+      }
+    },
+    "itineraryCard": {
+      "backgroundColor": "#FFFFFF",
+      "borderRadius": "16px",
+      "padding": "16px",
+      "margin": "8px 0px",
+      "shadow": "0 2px 8px rgba(0, 0, 0, 0.05)",
+      "dayNumber": {
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "color": "#6C757D",
+        "marginBottom": "4px"
+      },
+      "title": {
+        "fontSize": "16px",
+        "fontWeight": 600,
+        "color": "#1A1A1A",
+        "marginBottom": "12px"
+      },
+      "timeSlot": {
+        "marginBottom": "8px"
+      },
+      "timeLabel": {
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "color": "#6C757D",
+        "textTransform": "uppercase"
+      },
+      "activity": {
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "color": "#1A1A1A",
+        "marginTop": "2px"
+      },
+      "thumbnail": {
+        "width": "60px",
+        "height": "60px",
+        "borderRadius": "12px",
+        "objectFit": "cover",
+        "float": "right"
+      }
+    },
+    "button": {
+      "primary": {
+        "height": "52px",
+        "backgroundColor": "#1A1A1A",
+        "color": "#FFFFFF",
+        "borderRadius": "26px",
+        "fontSize": "16px",
+        "fontWeight": 600,
+        "padding": "0px 24px",
+        "width": "100%"
+      },
+      "secondary": {
+        "height": "40px",
+        "backgroundColor": "#F8F9FA",
+        "color": "#1A1A1A",
+        "borderRadius": "20px",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "padding": "0px 16px"
+      },
+      "ghost": {
+        "backgroundColor": "transparent",
+        "color": "#6C757D",
+        "border": "1px solid #E9ECEF",
+        "borderRadius": "8px"
+      }
+    },
+    "bottomNavigation": {
+      "height": "80px",
+      "backgroundColor": "#FFFFFF",
+      "borderTopLeftRadius": "20px",
+      "borderTopRightRadius": "20px",
+      "shadow": "0 -4px 20px rgba(0, 0, 0, 0.1)",
+      "padding": "12px 0px",
+      "items": {
+        "count": 4,
+        "spacing": "equal",
+        "iconSize": "24px",
+        "activeColor": "#1A1A1A",
+        "inactiveColor": "#6C757D"
+      }
+    },
+    "statusBar": {
+      "height": "44px",
+      "backgroundColor": "transparent",
+      "time": {
+        "fontSize": "17px",
+        "fontWeight": 600,
+        "color": "#1A1A1A"
+      },
+      "indicators": {
+        "color": "#1A1A1A"
+      }
+    }
+  },
+  "screens": {
+    "home": {
+      "layout": "vertical",
+      "sections": [
+        "header",
+        "searchBar", 
+        "categoryTabs",
+        "featuredDestination",
+        "sectionTitle",
+        "horizontalScroll"
+      ]
+    },
+    "destination": {
+      "layout": "vertical",
+      "sections": [
+        "heroImage",
+        "destinationInfo",
+        "upcomingTours",
+        "tourGrid"
+      ]
+    },
+    "itinerary": {
+      "layout": "vertical",
+      "sections": [
+        "header",
+        "scheduleToggle",
+        "dayTimeline",
+        "bookingButton"
+      ]
+    }
+  },
+  "animations": {
+    "cardHover": {
+      "transform": "translateY(-4px)",
+      "shadow": "0 12px 35px rgba(0, 0, 0, 0.15)",
+      "duration": "0.3s",
+      "easing": "ease-out"
+    },
+    "buttonPress": {
+      "transform": "scale(0.98)",
+      "duration": "0.1s",
+      "easing": "ease-in-out"
+    },
+    "slideIn": {
+      "transform": "translateX(100%)",
+      "duration": "0.4s",
+      "easing": "cubic-bezier(0.25, 0.46, 0.45, 0.94)"
+    },
+    "fadeIn": {
+      "opacity": "0 to 1",
+      "duration": "0.5s",
+      "easing": "ease-out"
+    }
+  },
+  "interactions": {
+    "swipeGestures": {
+      "horizontal": "enabled",
+      "threshold": "50px",
+      "velocity": "0.3"
+    },
+    "pullToRefresh": {
+      "enabled": true,
+      "threshold": "80px"
+    },
+    "infiniteScroll": {
+      "enabled": true,
+      "threshold": "200px"
+    }
+  },
+  "imageGuidelines": {
+    "aspectRatios": {
+      "hero": "16:10",
+      "card": "4:3",
+      "thumbnail": "1:1",
+      "banner": "21:9"
+    },
+    "quality": {
+      "resolution": "high",
+      "compression": "optimized",
+      "format": "webp, jpg fallback"
+    },
+    "treatment": {
+      "saturation": "enhanced",
+      "contrast": "moderate",
+      "brightness": "natural",
+      "filters": "warm tone preferred"
+    }
+  },
+  "accessibility": {
+    "minimumTapTarget": "44px",
+    "colorContrast": "WCAG AA compliant",
+    "fontSize": "scalable",
+    "voiceOver": "supported",
+    "darkMode": "adaptive"
+  },
+  "responsive": {
+    "breakpoints": {
+      "mobile": "375px - 414px",
+      "mobileLarge": "414px - 768px",
+      "tablet": "768px - 1024px"
+    },
+    "scaling": {
+      "images": "responsive",
+      "text": "fluid",
+      "spacing": "proportional"
+    }
+  }
+}
